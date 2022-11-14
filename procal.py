@@ -2,11 +2,17 @@
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 
+from CalculatePresentFuture import CalculatePresentFuture
+from CalculateUniformSeries import CalculateUniformSeries
+
 win =  tk.Tk()
 win.title("ProCal")
 
 total = 0 # present or future sum
 pct = 0 # interest rate
+
+uni = CalculateUniformSeries() # calculate uniform series, A
+pre_fut = CalculatePresentFuture() # calculate present or future sum
 
 def calculateSum():
 
@@ -16,9 +22,13 @@ def calculateSum():
     prd = (period.get())  # get the period entered
     percentage = per.get()  # get the interest rate per interest period
 
+    message = ""
+
     # convert interest rate from string to number
     if percentage == "3%":
         pct = 0.03
+    elif percentage == "5%":
+        pct = 0.05
     elif percentage == "6%":
         pct = 0.06
     elif percentage == "12%":
@@ -26,24 +36,10 @@ def calculateSum():
     else:
         pct = 0.15
 
-    present = chVarName.get() # to find out whether present or future sum is given
-
-    if(present == 1): # if present sum is known then find the future sum of money
-        total = round(amout * pow((1 + pct), prd), 2)
+    if(chUSeries.get() == 1):
+        uni.calculate(amout, prd, pct, message, scroll, percentage)
     else:
-        total = round(amout / pow((1 + pct), prd), 2)
-
-    message = ""
-    if (present == 1):
-        message += "With " + percentage + " interest rate per interest period " + "you will receive " + "$" + str(
-                total) + " at the end of " + str(prd) + " interest period(s)" + " if you invest " + "$" + str(
-                amout) + " at this moment!\n"
-    else:
-        message += "With " + percentage + " interest rate per interest period " + "you will receive " + "$" + str(
-                amout) + " at the end of " + str(prd) + " interest period(s)" + " if you invest " + "$" + str(
-                total) + " at this moment!\n"
-
-    scroll.insert(tk.END, message)
+        pre_fut.calculate(amout, prd, percentage, message, scroll, pct, chVarName.get())
 
 # create a button
 calculate = ttk.Button(win, text="Calculate", command=calculateSum) # calculate button
@@ -69,7 +65,7 @@ entry_period.grid(column=1, row=1, padx=3)
 # combo box
 per = tk.StringVar()
 percentage = ttk.Combobox(win, width=16, textvariable=per, state='readonly') # readonly will avoid the user from typing value into the combo box
-percentage['value'] = ('3%', '6%', '12%', '15%') # compound interest factors
+percentage['value'] = ('3%', '5%', '6%', '12%', '15%') # compound interest factors
 percentage.grid(column=2, row=1)
 percentage.current(0)
 
@@ -84,5 +80,10 @@ chVarName = tk.IntVar()
 check0 = tk.Checkbutton(win, text="Present Sum", variable=chVarName)
 check0.select()
 check0.grid(column=3, row=1)
+
+# Create a checkbox of uniform series
+chUSeries = tk.IntVar()
+check1 = tk.Checkbutton(win, text="Uniform Series", variable=chUSeries)
+check1.grid(column=4, row=1)
 
 win.mainloop()
